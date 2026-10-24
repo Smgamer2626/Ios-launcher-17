@@ -176,6 +176,44 @@ class AndroidSystemManager(private val context: Context) {
         startIntentSafely(intent)
     }
 
+    fun launchCalculator(): Boolean {
+        val intent = Intent().apply {
+            action = Intent.ACTION_MAIN
+            addCategory(Intent.CATEGORY_APP_CALCULATOR)
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        }
+        return if (!startIntentSafely(intent)) {
+            val calcPackages = listOf("com.google.android.calculator", "com.sec.android.app.popupcalculator", "com.android.calculator2")
+            calcPackages.any { launchPackage(it) }
+        } else true
+    }
+
+    fun launchPhotos(): Boolean {
+        val intent = Intent(Intent.ACTION_VIEW).apply {
+            type = "image/*"
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        }
+        return startIntentSafely(intent)
+    }
+
+    fun launchNotes(): Boolean {
+        val intent = Intent(Intent.ACTION_CREATE_NOTE).apply {
+            flags = Intent.FLAG_ACTIVITY_NEW_TASK
+        }
+        return if (!startIntentSafely(intent)) {
+            val fallback = Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(Intent.EXTRA_TEXT, "")
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK
+            }
+            startIntentSafely(fallback)
+        } else true
+    }
+
+    fun launchScreenRecordOrCapture(): Boolean {
+        return startIntentSafely(Intent(Settings.ACTION_DISPLAY_SETTINGS))
+    }
+
     fun launchPackage(packageName: String): Boolean {
         return try {
             val intent = context.packageManager.getLaunchIntentForPackage(packageName)?.apply {

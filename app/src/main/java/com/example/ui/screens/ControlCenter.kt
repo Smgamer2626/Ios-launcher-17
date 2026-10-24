@@ -31,6 +31,7 @@ import androidx.compose.material.icons.filled.BatteryChargingFull
 import androidx.compose.material.icons.filled.BatterySaver
 import androidx.compose.material.icons.filled.Bluetooth
 import androidx.compose.material.icons.filled.BrightnessHigh
+import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.CameraAlt
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DoNotDisturb
@@ -42,6 +43,7 @@ import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.ScreenShare
 import androidx.compose.material.icons.filled.SignalCellularAlt
 import androidx.compose.material.icons.filled.Timer
+import androidx.compose.material.icons.filled.Videocam
 import androidx.compose.material.icons.filled.VolumeDown
 import androidx.compose.material.icons.filled.VolumeMute
 import androidx.compose.material.icons.filled.VolumeUp
@@ -96,6 +98,8 @@ fun ControlCenter(
     dynamicIslandData: DynamicIslandData,
     onTogglePlay: () -> Unit,
     onLaunchCamera: () -> Unit,
+    onLaunchCalculator: () -> Unit,
+    onLaunchScreenRecord: () -> Unit,
     onOpenTimer: () -> Unit,
     onOpenSettings: () -> Unit,
     modifier: Modifier = Modifier
@@ -417,7 +421,7 @@ fun ControlCenter(
 
                 Spacer(modifier = Modifier.height(14.dp))
 
-                // Row 3: Action Buttons (Torch, Timer, Camera, Settings)
+                // Row 3: Quick Action Grid (Torch, Timer, Camera, Calculator)
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween
@@ -445,6 +449,31 @@ fun ControlCenter(
                         activeColor = Color.White,
                         onClick = onLaunchCamera,
                         testTag = "cc_quick_camera"
+                    )
+                    QuickActionButton(
+                        icon = Icons.Default.Calculate,
+                        label = "Calculator",
+                        isActive = false,
+                        activeColor = AppleOrange,
+                        onClick = onLaunchCalculator,
+                        testTag = "cc_quick_calculator"
+                    )
+                }
+
+                Spacer(modifier = Modifier.height(14.dp))
+
+                // Row 4: Secondary Quick Action Grid (Screen Record, Settings)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(14.dp)
+                ) {
+                    QuickActionButton(
+                        icon = Icons.Default.Videocam,
+                        label = "Screen Record",
+                        isActive = false,
+                        activeColor = AppleRed,
+                        onClick = onLaunchScreenRecord,
+                        testTag = "cc_quick_record"
                     )
                     QuickActionButton(
                         icon = Icons.Default.ScreenShare,

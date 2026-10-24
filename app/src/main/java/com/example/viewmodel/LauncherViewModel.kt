@@ -59,6 +59,20 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
     private val _isHapticEnabled = MutableStateFlow(true)
     val isHapticEnabled: StateFlow<Boolean> = _isHapticEnabled.asStateFlow()
 
+    // iOS HUD Toast
+    private val _toastMessage = MutableStateFlow<String?>(null)
+    val toastMessage: StateFlow<String?> = _toastMessage.asStateFlow()
+    private var toastJob: kotlinx.coroutines.Job? = null
+
+    fun showToast(msg: String) {
+        toastJob?.cancel()
+        _toastMessage.value = msg
+        toastJob = viewModelScope.launch {
+            delay(1800)
+            _toastMessage.value = null
+        }
+    }
+
     // Wallpapers
     val availableWallpapers = listOf(
         WallpaperOption(
@@ -269,8 +283,12 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
             _isTorchOn.value = next
             if (next) {
                 setIslandMode(IslandMode.TORCH)
-            } else if (_dynamicIsland.value.mode == IslandMode.TORCH) {
-                setIslandMode(IslandMode.MUSIC)
+                showToast("Flashlight Activated")
+            } else {
+                if (_dynamicIsland.value.mode == IslandMode.TORCH) {
+                    setIslandMode(IslandMode.MUSIC)
+                }
+                showToast("Flashlight Turned Off")
             }
         }
         if (_isHapticEnabled.value) systemManager.triggerHapticFeedback()
@@ -289,36 +307,43 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
     fun toggleWifi() {
         if (_isHapticEnabled.value) systemManager.triggerHapticFeedback()
         _isWifiOn.value = !_isWifiOn.value
+        showToast("Opening Wi-Fi Settings...")
         systemManager.openWifiSettings()
     }
 
     fun toggleBluetooth() {
         if (_isHapticEnabled.value) systemManager.triggerHapticFeedback()
         _isBluetoothOn.value = !_isBluetoothOn.value
+        showToast("Opening Bluetooth Settings...")
         systemManager.openBluetoothSettings()
     }
 
     fun toggleAirplane() {
         if (_isHapticEnabled.value) systemManager.triggerHapticFeedback()
         _isAirplaneOn.value = !_isAirplaneOn.value
+        showToast("Opening Airplane Mode Settings...")
         systemManager.openAirplaneSettings()
     }
 
     fun toggleCellular() {
         if (_isHapticEnabled.value) systemManager.triggerHapticFeedback()
         _isCellularOn.value = !_isCellularOn.value
+        showToast("Opening Cellular Settings...")
         systemManager.openDataSettings()
     }
 
     fun toggleDnd() {
         if (_isHapticEnabled.value) systemManager.triggerHapticFeedback()
         _isDndOn.value = !_isDndOn.value
+        showToast("Focus / Do Not Disturb")
         systemManager.openDndSettings()
     }
 
     fun toggleLowPower() {
         if (_isHapticEnabled.value) systemManager.triggerHapticFeedback()
-        _isLowPowerOn.value = !_isLowPowerOn.value
+        val next = !_isLowPowerOn.value
+        _isLowPowerOn.value = next
+        showToast(if (next) "Low Power Mode Enabled" else "Low Power Mode Disabled")
     }
 
     fun toggleDynamicIslandExpanded() {
@@ -411,29 +436,68 @@ class LauncherViewModel(application: Application) : AndroidViewModel(application
         }
 
         if (app.packageName != null) {
-            systemManager.launchPackage(app.packageName)
+            val launched = systemManager.launchPackage(app.packageName)
+            showToast(if (launched) "Opening ${app.name}..." else "Failed to open ${app.name}")
             return
         }
 
         when (app.id) {
-            "dock_phone" -> systemManager.launchDialer()
-            "dock_messages" -> systemManager.launchMessages()
-            "dock_safari" -> systemManager.launchBrowser()
-            "dock_camera" -> systemManager.launchCamera()
-            "app_settings" -> navigateTo(ScreenState.SETTINGS_SCREEN)
-            "app_camera" -> systemManager.launchCamera()
-            "app_weather" -> toggleDynamicIslandExpanded()
+            "dock_phone" -> {
+                showToast("Opening Phone...")
+                systemManager.launchDialer()
+            }
+            "dock_messages" -> {
+                showToast("Opening Messages...")
+                systemManager.launchMessages()
+            }
+            "dock_safari" -> {
+                showToast("Opening Safari...")
+                systemManager.launchBrowser()
+            }
+            "dock_camera", "app_camera" -> {
+                showToast("Opening Camera...")
+                systemManager.launchCamera()
+            }
+            "app_photos" -> {
+                showToast("Opening Photos Gallery...")
+                systemManager.launchPhotos()
+            }
+            "app_calculator" -> {
+                showToast("Opening Calculator...")
+                systemManager.launchCalculator()
+            }
+            "app_notes" -> {
+                showToast("Opening Notes...")
+                systemManager.launchNotes()
+            }
+            "app_settings" -> {
+                showToast("Opening Settings...")
+                navigateTo(ScreenState.SETTINGS_SCREEN)
+            }
+            "app_weather" -> {
+                showToast("Cupertino • 72° Sunny")
+                toggleDynamicIslandExpanded()
+            }
             "app_clock" -> {
                 setIslandMode(IslandMode.TIMER)
                 _dynamicIsland.value = _dynamicIsland.value.copy(isExpanded = true)
+                showToast("Countdown Timer Active")
             }
             "app_music" -> {
                 setIslandMode(IslandMode.MUSIC)
                 _dynamicIsland.value = _dynamicIsland.value.copy(isExpanded = true)
+                showToast("Now Playing: ${_dynamicIsland.value.trackTitle}")
             }
-            "app_calculator" -> systemManager.openDefaultHomeSettings() // or settings
+            "app_calendar" -> {
+                showToast("Opening Calendar...")
+                navigateTo(ScreenState.SETTINGS_SCREEN)
+            }
+            "app_maps" -> {
+                showToast("Launching Navigation...")
+                systemManager.launchBrowser()
+            }
             else -> {
-                // If it's another built-in, open settings or trigger island
+                showToast("Selected ${app.name}")
                 toggleDynamicIslandExpanded()
             }
         }

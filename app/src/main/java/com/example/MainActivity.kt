@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -20,6 +21,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.model.ScreenState
+import com.example.ui.components.IosToastHud
 import com.example.ui.screens.ControlCenter
 import com.example.ui.screens.HomeScreen
 import com.example.ui.screens.LockScreen
@@ -69,6 +71,7 @@ fun LauncherRootApp(
     val homeApps by viewModel.homeGridApps.collectAsStateWithLifecycle()
     val isDarkTheme by viewModel.isDarkTheme.collectAsStateWithLifecycle()
     val isHapticEnabled by viewModel.isHapticEnabled.collectAsStateWithLifecycle()
+    val toastMessage by viewModel.toastMessage.collectAsStateWithLifecycle()
 
     // Back handling
     BackHandler(enabled = isControlCenterOpen || isEditMode || screenState != ScreenState.LOCK_SCREEN) {
@@ -196,6 +199,14 @@ fun LauncherRootApp(
             dynamicIslandData = dynamicIslandData,
             onTogglePlay = { viewModel.toggleMusicPlayback() },
             onLaunchCamera = { viewModel.systemManager.launchCamera() },
+            onLaunchCalculator = {
+                viewModel.systemManager.launchCalculator()
+                viewModel.showToast("Opening Calculator...")
+            },
+            onLaunchScreenRecord = {
+                viewModel.systemManager.launchScreenRecordOrCapture()
+                viewModel.showToast("Screen Capture / Display Settings...")
+            },
             onOpenTimer = {
                 viewModel.setIslandMode(com.example.model.IslandMode.TIMER)
                 viewModel.closeControlCenter()
@@ -205,6 +216,12 @@ fun LauncherRootApp(
                 viewModel.closeControlCenter()
                 viewModel.navigateTo(ScreenState.SETTINGS_SCREEN)
             }
+        )
+
+        // Floating iOS Pill Toast HUD
+        IosToastHud(
+            message = toastMessage,
+            modifier = Modifier.align(Alignment.TopCenter)
         )
     }
 }

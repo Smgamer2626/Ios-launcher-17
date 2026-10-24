@@ -121,14 +121,15 @@ fun CalendarWidget(
         ) {
             Column {
                 Text(
-                    text = "TODAY",
+                    text = if (dateStr.contains(",")) dateStr.substringBefore(",").uppercase() else "TODAY",
                     color = Color(0xFFFF453A),
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 1.sp
                 )
+                val dayOfMonth = dateStr.filter { it.isDigit() }.ifEmpty { "24" }
                 Text(
-                    text = "24",
+                    text = dayOfMonth,
                     color = Color.White,
                     fontSize = 34.sp,
                     fontWeight = FontWeight.SemiBold
@@ -142,15 +143,12 @@ fun CalendarWidget(
                     .padding(horizontal = 8.dp, vertical = 6.dp)
             ) {
                 Text(
-                    text = "Nova Launch",
-                    color = Color.White,
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Text(
-                    text = "2:00 PM • Live Demo",
-                    color = Color.White.copy(alpha = 0.65f),
-                    fontSize = 10.sp
+                    text = "A beautiful day to build something.",
+                    color = Color.White.copy(alpha = 0.9f),
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Medium,
+                    lineHeight = 14.sp,
+                    maxLines = 2
                 )
             }
         }
