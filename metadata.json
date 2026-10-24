@@ -1,0 +1,6 @@
+{
+  "name": "iOS Nova",
+  "description": "iPhone-style Android launcher experience featuring iOS Lock Screen, Control Center, Dynamic Island, and customizable Home Screen.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
